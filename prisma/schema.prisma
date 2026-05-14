@@ -9,4 +9,91 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MAHASISWA
+  STAFF
+}
+
+enum DivisionType {
+  ICT
+  PM
+}
+
+enum ReportStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  REJECTED
+  CANCELLED
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  password    String
+  role        UserRole
+  division    DivisionType?
+  createdAt   DateTime  @default(now())
+
+  reports         Report[]
+  upvotes         Upvote[]
+  statusHistories StatusHistory[]
+}
+
+model Report {
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String
+  location      String
+  floor         String
+  room          String
+  division      DivisionType
+  status        ReportStatus   @default(PENDING)
+  createdAt     DateTime       @default(now())
+
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+
+  upvotes       Upvote[]
+  images        ReportImage[]
+  statusHistory StatusHistory[]
+}
+
+model Upvote {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  userId    Int
+  reportId  Int
+
+  user      User     @relation(fields: [userId], references: [id])
+  report    Report   @relation(fields: [reportId], references: [id])
+
+  @@unique([userId, reportId])
+}
+
+model ReportImage {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+
+  reportId  Int
+  report    Report   @relation(fields: [reportId], references: [id])
+}
+
+model StatusHistory {
+  id          Int           @id @default(autoincrement())
+  oldStatus   ReportStatus?
+  newStatus   ReportStatus
+  note        String?
+  changedAt   DateTime      @default(now())
+
+  reportId    Int
+  changedById Int
+
+  report      Report        @relation(fields: [reportId], references: [id])
+  changedBy   User          @relation(fields: [changedById], references: [id])
 }

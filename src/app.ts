@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import authRoutes from "./routes/public/auth.routes";
+import reportRoutes from "./routes/private/report.routes";
 
 const app = express();
 
@@ -9,6 +11,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+//App routes
+//Public routes
+app.use("/api/auth", authRoutes);
+
+//Private routes
+app.use("/api/reports", reportRoutes);
 
 app.get("/", (req, res) => {
   res.json({
