@@ -1,6 +1,6 @@
-import { CreateReportRequestDTO } from "../dtos/report.dto";
-import { ReportRepository } from "../repositories/report.repository";
-import { validateCreateReportInput } from "../validations/report.validations";
+import { CreateReportRequestDTO } from "../dtos/ReportDTO";
+import { ReportRepository } from "../repositories/ReportRepository";
+import { validateCreateReportInput } from "../validations/ReportValidation";
 
 export class ReportService {
   private reportRepository = new ReportRepository();

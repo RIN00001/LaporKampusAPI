@@ -1,4 +1,4 @@
-import { LoginRequestDTO, RegisterRequestDTO } from "../dtos/auth.dto";
+import { LoginRequestDTO, RegisterRequestDTO } from "../dtos/AuthDTO";
 
 export function validateRegisterInput(dto: RegisterRequestDTO) {
   const { name, email, password } = dto;

@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import authRoutes from "./routes/public/auth.routes";
-import reportRoutes from "./routes/private/report.routes";
+import authRoutes from "./routes/public/AuthRoute";
+import reportRoutes from "./routes/private/ReportRoute";
 
 const app = express();
 

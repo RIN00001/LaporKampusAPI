@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { AuthRepository } from "../repositories/auth.repository";
-import { LoginRequestDTO, RegisterRequestDTO } from "../dtos/auth.dto";
+import { AuthRepository } from "../repositories/AuthRepository";
+import { LoginRequestDTO, RegisterRequestDTO } from "../dtos/AuthDTO";
 import {
   validateLoginInput,
   validateRegisterInput,
-} from "../validations/auth.validation";
+} from "../validations/AuthValidation";
 
 export class AuthService {
   private authRepository = new AuthRepository();

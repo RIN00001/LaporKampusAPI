@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { ReportService } from "../services/report.service";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { ReportService } from "../services/ReportService";
+import { AuthRequest } from "../middlewares/AuthMiddleware";
 
 export class ReportController {
   private reportService = new ReportService();

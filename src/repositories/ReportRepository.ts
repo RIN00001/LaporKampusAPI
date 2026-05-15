@@ -1,5 +1,5 @@
 import { prisma } from "../config/prisma";
-import { CreateReportRequestDTO } from "../dtos/report.dto";
+import { CreateReportRequestDTO } from "../dtos/ReportDTO";
 
 export class ReportRepository {
         createReport(userId: number, dto: CreateReportRequestDTO) {

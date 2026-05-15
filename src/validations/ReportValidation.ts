@@ -1,4 +1,4 @@
-import { CreateReportRequestDTO } from "../dtos/report.dto";
+import { CreateReportRequestDTO } from "../dtos/ReportDTO";
 import { DivisionType } from "@prisma/client";
 
 export function validateCreateReportInput(dto: CreateReportRequestDTO) {

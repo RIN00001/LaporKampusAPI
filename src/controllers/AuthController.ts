@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { AuthService } from "../services/auth.service";
-import { ResponseError } from "../utils/response-error";
+import { AuthService } from "../services/AuthService";
+import { ResponseError } from "../utils/ResponseError";
 
 export class AuthController {
   private authService = new AuthService();
