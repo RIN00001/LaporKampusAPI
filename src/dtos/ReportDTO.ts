@@ -1,11 +1,19 @@
 import { DivisionType } from "@prisma/client";
 
 export interface CreateReportRequestDTO {
-  title: string;
-  description: string;
-  location: string;
-  floor: string;
-  room: string;
-  division: DivisionType;
-  imageUrl?: string;
+  titleReport: string;
+  descriptionReport: string;
+  locationReport: string;
+  floorReport: string;
+  roomReport: string;
+  divisionReport: DivisionType;
+  imageUrlReport?: string;
+}
+
+export interface ReportResponseDTO {
+  reportIdReport: number,
+  titleReport: string,
+  descriptionReport: string,
+  statusReport: string,
+  locationReport: string
 }

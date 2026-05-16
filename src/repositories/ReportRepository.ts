@@ -1,16 +1,16 @@
-import { prisma } from "../config/prisma";
+import { prisma } from "../config/Prisma";
 import { CreateReportRequestDTO } from "../dtos/ReportDTO";
 
 export class ReportRepository {
         createReport(userId: number, dto: CreateReportRequestDTO) {
           return prisma.report.create({
             data: {
-              title: dto.title,
-              description: dto.description,
-              location: dto.location,
-              floor: dto.floor,
-              room: dto.room,
-              division: dto.division,
+              title: dto.titleReport,
+              description: dto.descriptionReport,
+              location: dto.locationReport,
+              floor: dto.floorReport,
+              room: dto.roomReport,
+              division: dto.divisionReport,
               userId,
             },
             include: {
