@@ -18,4 +18,24 @@ export class ReportController {
       });
     }
   };
+
+  validateReport = async(req: AuthRequest, res: Response) => {
+    try {
+      // Fetch both userId of a user
+      const userId = Number(req.user?.id);
+
+      // Fetch reportId that will be validate
+      const reportId = Number(req.params.id);
+
+      // Calling service to do validation
+      const result = await this.reportService.validateReport(reportId, userId, req.body);
+      // If success, show the result & status 201
+      res.status(201).json(result);
+    } catch (error) {
+      // If fail, show error & status 400
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Create report failed",
+      });
+    }
+  }
 }
