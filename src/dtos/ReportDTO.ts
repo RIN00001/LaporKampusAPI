@@ -1,4 +1,4 @@
-import { DivisionType } from "@prisma/client";
+import { ReportStatus, DivisionType } from "@prisma/client";
 
 export interface CreateReportRequestDTO {
   titleReport: string;
@@ -16,4 +16,9 @@ export interface ReportResponseDTO {
   descriptionReport: string,
   statusReport: string,
   locationReport: string
+}
+
+export interface ReportValidateDTO {
+  newStatusReport: ReportStatus;
+  noteReport?: string;
 }
