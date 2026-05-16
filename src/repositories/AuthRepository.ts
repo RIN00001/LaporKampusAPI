@@ -18,4 +18,17 @@ export class AuthRepository {
       },
     });
   }
+
+  checkUser(userId: number) {
+    return prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      select: {
+        id: true,
+        role: true,
+        division: true
+      }
+    })
+  }
 }
