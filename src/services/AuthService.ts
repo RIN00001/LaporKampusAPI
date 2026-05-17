@@ -6,6 +6,7 @@ import {
   validateLoginInput,
   validateRegisterInput,
 } from "../validations/AuthValidation";
+import { DivisionType } from "@prisma/client";
 
 export class AuthService {
   private authRepository = new AuthRepository();
@@ -79,5 +80,28 @@ export class AuthService {
         division: user.division,
       },
     };
+  }
+
+  // Validate if an user is a staff
+  async checkIfUserAdmin(userId: number) {
+    const user = await this.authRepository.checkUser(userId)
+    if (!user) {
+      throw new Error("User not found");
+    }
+    if (user.role !== "STAFF") {
+      throw new Error("Unauthorized: Only staff members can validate reports");
+    }
+
+    return user;
+  }
+
+  // Validate if user is a staff of a certain division that's the same as the report
+  checkIfReportIsPartOfStaffDivision(staffDivision: DivisionType | null, reportTakenDivision: DivisionType) {
+    if(!staffDivision) {
+      throw new Error("Unauthorized: You are not assigned to any division")
+    } 
+    if(staffDivision !== reportTakenDivision) {
+      throw new Error(`Unauthorized: You can only validate reports for ${staffDivision}`)
+    }
   }
 }
