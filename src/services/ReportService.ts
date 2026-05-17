@@ -7,7 +7,7 @@ import { validateCreateReportInput } from "../validations/ReportValidation";
 export class ReportService {
   private reportRepository = new ReportRepository();
   private authRepository = new AuthRepository();
-  
+
   async createReport(userId: number, dto: CreateReportRequestDTO) {
     validateCreateReportInput(dto);
 
@@ -36,6 +36,10 @@ export class ReportService {
     // If no report found, throw errors
     if(!fetchReport) {
       throw new Error("Report not found!")
+    }
+
+    if(fetchReport.status === dto.newStatusReport) {
+      throw new Error(`Report is already in the stauts ${dto.newStatusReport}`)
     }
     
     // Check if report & user have the same division
