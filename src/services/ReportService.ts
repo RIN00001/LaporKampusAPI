@@ -7,7 +7,7 @@ import { validateCreateReportInput } from "../validations/ReportValidation";
 export class ReportService {
   private reportRepository = new ReportRepository();
   private authRepository = new AuthRepository();
-
+  
   async createReport(userId: number, dto: CreateReportRequestDTO) {
     validateCreateReportInput(dto);
 
@@ -50,7 +50,6 @@ export class ReportService {
       report: updatedValidationReport,
     }
   }
-
 
   // Validate if an user is a staff
   async checkIfUserAdmin(userId: number) {

@@ -34,7 +34,7 @@ export class ReportController {
     } catch (error) {
       // If fail, show error & status 400
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Create report failed",
+        message: error instanceof Error ? error.message : "Validate report failed",
       });
     }
   }
