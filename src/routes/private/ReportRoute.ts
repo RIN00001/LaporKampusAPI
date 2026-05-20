@@ -8,6 +8,7 @@ const reportController = new ReportController();
 router.post("/", authMiddleware, reportController.createReport);
 
 //! Admin side
+router.get("/staff", authMiddleware, reportController.showAllReportByDivision)
 router.post("/validate/:id", authMiddleware, reportController.validateReport)
 
 export default router;

@@ -18,6 +18,7 @@ export interface ReportResponseDTO {
   locationReport: string;
   floorReport: string;
   roomReport: string;
+  upvoteCountReport: number;
 }
 
 export interface ReportValidateDTO {

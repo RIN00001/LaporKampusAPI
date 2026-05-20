@@ -5,6 +5,7 @@ import { AuthRequest } from "../middlewares/AuthMiddleware";
 export class ReportController {
   private reportService = new ReportService();
 
+  // User Side
   createReport = async (req: AuthRequest, res: Response) => {
     try {
       const userId = Number(req.user?.id);
@@ -18,6 +19,20 @@ export class ReportController {
       });
     }
   };
+
+  // Staff side
+  showAllReportByDivision = async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = Number(req.user?.id)
+
+      const result = await this.reportService.getReportsByDivision(userId)
+      res.status(201).json(result)
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Unknown error is detected"
+      })
+    }
+  }
 
   validateReport = async(req: AuthRequest, res: Response) => {
     try {

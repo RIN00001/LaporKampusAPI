@@ -83,7 +83,7 @@ export class AuthService {
   }
 
   // Validate if an user is a staff
-  async checkIfUserAdmin(userId: number) {
+  async checkIfUserStaff(userId: number) {
     const user = await this.authRepository.checkUser(userId)
     if (!user) {
       throw new Error("User not found");
@@ -93,6 +93,17 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  // Validate staff that access admin
+  validateStaffDivision(division: DivisionType | null) {
+    // If user have no division, throw error
+    if (!division) {
+      throw new Error("Unauthorized: You are not assigned to any division")
+    }
+
+    // Return division
+    return division;
   }
 
   // Validate if user is a staff of a certain division that's the same as the report

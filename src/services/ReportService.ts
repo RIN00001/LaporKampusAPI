@@ -7,6 +7,7 @@ export class ReportService {
   private reportRepository = new ReportRepository();
   private authService = new AuthService();
 
+  // User Side
   async createReport(userId: number, dto: CreateReportRequestDTO) {
     validateCreateReportInput(dto);
 
@@ -24,10 +25,22 @@ export class ReportService {
     };
   }
 
+  // Staff Side
+  // Take report based on staff division
+  async getReportsByDivision(userId: number) {
+    const user = await this.authService.checkIfUserStaff(userId)
+
+    const division = await this.authService.validateStaffDivision(user.division);
+
+    const reports = await this.reportRepository.findReportsByDivision(division);
+
+    return reports
+  }
+
   // Changing a report validation
   async validateReport(reportId: number, userId: number, dto: ReportValidateDTO) {
     // Check if user is an admin
-    const user = await this.authService.checkIfUserAdmin(userId)
+    const user = await this.authService.checkIfUserStaff(userId)
 
     // Fetch a report
     const fetchReport = await this.reportRepository.getReportById(reportId)

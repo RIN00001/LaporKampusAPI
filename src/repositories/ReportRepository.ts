@@ -1,4 +1,4 @@
-import { ReportStatus } from "@prisma/client";
+import { DivisionType, ReportStatus } from "@prisma/client";
 import { prisma } from "../config/Prisma";
 import { CreateReportRequestDTO, ReportValidateDTO } from "../dtos/ReportDTO";
 
@@ -78,6 +78,31 @@ export class ReportRepository {
             name: true,
             email: true,
           }
+        }
+      }
+    })
+  }
+
+  findReportsByDivision(division: DivisionType) {
+    return prisma.report.findMany({
+      //Find all report based on staff logged in
+      where: {
+        division: division,
+      },
+
+      // Take how many upvotes a report has
+      include: {
+        _count: {
+          select: {
+            upvotes: true,
+          },
+        },
+      },
+      
+      // Order it from highest
+      orderBy: {
+        upvotes: {
+          _count: "desc"
         }
       }
     })
