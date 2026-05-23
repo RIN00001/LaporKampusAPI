@@ -21,6 +21,7 @@ export class ReportController {
   };
 
   // Staff side
+  // Take all report based on division
   showAllReportByDivision = async (req: AuthRequest, res: Response) => {
     try {
       const userId = Number(req.user?.id)
@@ -34,6 +35,23 @@ export class ReportController {
     }
   }
 
+  // Take report in admin side
+  showDetailReportStaff = async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = Number(req.user?.id)
+
+      const reportId = Number(req.params.id)
+
+      const result = await this.reportService.getReportDetailStaff(reportId, userId)
+      res.status(201).json(result)
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Unknown error is detected"
+      })
+    }
+  }
+
+  // Validate a report
   validateReport = async(req: AuthRequest, res: Response) => {
     try {
       // Fetch both userId of a user

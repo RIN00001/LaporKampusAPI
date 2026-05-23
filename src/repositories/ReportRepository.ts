@@ -50,11 +50,27 @@ export class ReportRepository {
             email: true,
           },
         },
+        statusHistory: {
+          orderBy: {
+            changedAt: "desc",
+          },
+          take: 1,
+        },
+        _count: {
+          select: {
+            upvotes: true,
+          }
+        }
       },
     });
   }
 
-  updateReportStatus(reportId: number, staffId: number, oldStatus: ReportStatus, dto: ReportValidateDTO) {
+  updateReportStatus(
+    reportId: number,
+    staffId: number,
+    oldStatus: ReportStatus,
+    dto: ReportValidateDTO,
+  ) {
     return prisma.report.update({
       where: {
         id: reportId,
@@ -66,7 +82,7 @@ export class ReportRepository {
             oldStatus: oldStatus,
             newStatus: dto.newStatusReport,
             note: dto.noteReport,
-            changedById: staffId
+            changedById: staffId,
           },
         },
       },
@@ -77,10 +93,10 @@ export class ReportRepository {
             id: true,
             name: true,
             email: true,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
   }
 
   findReportsByDivision(division: DivisionType) {
@@ -97,14 +113,21 @@ export class ReportRepository {
             upvotes: true,
           },
         },
+        // Take the newest status & note for the UI
+        statusHistory: {
+          orderBy: {
+            changedAt: "desc",
+          },
+          take: 1,
+        },
       },
-      
+
       // Order it from highest
       orderBy: {
         upvotes: {
-          _count: "desc"
-        }
-      }
-    })
+          _count: "desc",
+        },
+      },
+    });
   }
 }

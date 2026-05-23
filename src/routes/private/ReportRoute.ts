@@ -9,6 +9,7 @@ router.post("/", authMiddleware, reportController.createReport);
 
 //! Admin side
 router.get("/staff", authMiddleware, reportController.showAllReportByDivision)
+router.get("/staff/:id", authMiddleware, reportController.showDetailReportStaff)
 router.post("/validate/:id", authMiddleware, reportController.validateReport)
 
 export default router;

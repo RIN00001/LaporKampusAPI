@@ -15,6 +15,7 @@ export interface ReportResponseDTO {
   titleReport: string;
   descriptionReport: string;
   statusReport: string;
+  noteReport: string;
   locationReport: string;
   floorReport: string;
   roomReport: string;

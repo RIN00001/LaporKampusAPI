@@ -11,7 +11,6 @@ export class AuthController {
 
       res.status(201).json(result);
     } catch (error) {
-      console.log(error)
       if (error instanceof ResponseError) {
         return res.status(error.status).json({
           message: error.message,
@@ -30,7 +29,6 @@ export class AuthController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.log(error)
       if (error instanceof ResponseError) {
         return res.status(error.status).json({
           message: error.message,
