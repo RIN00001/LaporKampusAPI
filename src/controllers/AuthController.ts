@@ -11,6 +11,7 @@ export class AuthController {
 
       res.status(201).json(result);
     } catch (error) {
+      console.log(error)
       if (error instanceof ResponseError) {
         return res.status(error.status).json({
           message: error.message,
@@ -18,7 +19,7 @@ export class AuthController {
       }
 
       res.status(500).json({
-        message: "Internal server error",
+        message: error instanceof Error ? error.message : "Internal server error",
       });
     }
   };
@@ -29,6 +30,7 @@ export class AuthController {
 
       res.status(200).json(result);
     } catch (error) {
+      console.log(error)
       if (error instanceof ResponseError) {
         return res.status(error.status).json({
           message: error.message,
@@ -36,7 +38,7 @@ export class AuthController {
       }
 
       res.status(500).json({
-        message: "Internal server error",
+        message: error instanceof Error ? error.message : "Internal server error",
       });
     }
   };
