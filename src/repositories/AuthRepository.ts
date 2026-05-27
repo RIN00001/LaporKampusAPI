@@ -1,4 +1,4 @@
-import { prisma } from "../config/prisma";
+import { prisma } from "../config/Prisma";
 import { UserRole } from "@prisma/client";
 
 export class AuthRepository {
