@@ -5,124 +5,195 @@ import { validateCreateReportInput } from "../validations/ReportValidation";
 import { AuthService } from "./AuthService";
 
 export class ReportService {
-  private reportRepository = new ReportRepository();
-  private authService = new AuthService();
+	private reportRepository = new ReportRepository();
+	private authService = new AuthService();
 
-  // User Side
-  async createReport(userId: number, dto: CreateReportRequestDTO) {
-    validateCreateReportInput(dto);
+	// To create a report from a user
+	async createReport(userId: number, dto: CreateReportRequestDTO) {
+		validateCreateReportInput(dto);
 
-    const report = await this.reportRepository.createReport(userId, dto);
+		const report = await this.reportRepository.createReport(userId, dto);
 
-    if (dto.imageUrlReport) {
-      await this.reportRepository.addReportImage(report.id, dto.imageUrlReport);
-    }
+		if (dto.imageUrlReport) {
+			await this.reportRepository.addReportImage(report.id, dto.imageUrlReport);
+		}
 
-    const finalReport = await this.reportRepository.getReportById(report.id);
+		const finalReport = await this.reportRepository.getReportById(report.id);
 
-    return {
-      message: "Report created successfully",
-      report: finalReport,
-    };
-  }
+		return {
+			message: "Report created successfully",
+			report: finalReport,
+		};
+	}
 
-  // Staff Side
-  // Take report based on staff division
-  async getReportsByDivision(userId: number) {
-    const user = await this.authService.checkIfUserStaff(userId);
+	// To get all reports for a specific user
+	async getAllReportsUser(userId: number) {
+		const userReports = await this.reportRepository.findReportsByUserId(userId);
 
-    const division = this.authService.validateStaffDivision(user.division);
+		return userReports.map((report) => {
+			const latestHistory = report.statusHistory?.[0];
 
-    const reportDivision =
-      await this.reportRepository.findReportsByDivision(division);
+			return {
+				reportIdReport: report.id,
+				titleReport: report.title,
+				descriptionReport: report.description,
+				statusReport: report.status,
+				locationReport: report.location,
+				floorReport: report.floor,
+				roomReport: report.room,
+				upvoteCountReport: report._count?.upvotes ?? 0,
+				noteReport: latestHistory?.note ?? "",
+			};
+		});
+	}
 
-    return reportDivision.map((report) => {
-      const latestHistory = report.statusHistory?.[0];
-      return {
-        reportIdReport: report.id,
-        titleReport: report.title,
-        descriptionReport: report.description,
-        statusReport: report.status,
-        locationReport: report.location,
-        floorReport: report.floor,
-        roomReport: report.room,
-        upvoteCountReport: report._count?.upvotes ?? 0,
-        noteReport: latestHistory?.note ?? "",
-      };
-    });
-  }
+	// To get a detailed report for a specific user
+	async getReportDetailUser(reportId: number, userId: number) {
+		const fetchReport = await this.reportRepository.getReportById(reportId);
 
-  async getReportDetailStaff(reportId: number, userId: number) {
-    const user = await this.authService.checkIfUserStaff(userId);
+		if (!fetchReport) {
+			throw new Error("Report not found!");
+		}
 
-    const division = this.authService.validateStaffDivision(user.division);
+		if (fetchReport.userId !== userId) {
+			throw new Error("You do not have access to view this report.");
+		}
 
-    const fetchReport = await this.reportRepository.getReportById(reportId);
+		const latestHistory = fetchReport.statusHistory?.[0];
 
-    if (!fetchReport) {
-      throw new Error("Report not found!");
-    }
+		return {
+			reportIdReport: fetchReport.id,
+			titleReport: fetchReport.title,
+			descriptionReport: fetchReport.description,
+			statusReport: fetchReport.status,
+			locationReport: fetchReport.location,
+			floorReport: fetchReport.floor,
+			roomReport: fetchReport.room,
+			upvoteCountReport: fetchReport._count?.upvotes ?? 0,
+			noteReport: latestHistory?.note ?? "",
+		};
+	}
 
-    this.authService.checkIfReportIsPartOfStaffDivision(
-      division,
-      fetchReport.division,
-    );
+	// To cancel a report from a user
+	async cancelReport(reportId: number, userId: number) {
+		const fetchReport = await this.reportRepository.getReportById(reportId);
 
-    const latestHistory = fetchReport.statusHistory?.[0];
+		if (!fetchReport) {
+			throw new Error("Report not found!");
+		}
 
-    return {
-      reportIdReport: fetchReport.id,
-      titleReport: fetchReport.title,
-      descriptionReport: fetchReport.description,
-      statusReport: fetchReport.status,
-      locationReport: fetchReport.location,
-      floorReport: fetchReport.floor,
-      roomReport: fetchReport.room,
-      upvoteCountReport: fetchReport._count.upvotes ?? 0,
-      noteReport: latestHistory?.note ?? "",
-    };
-  }
+		if (fetchReport.userId !== userId) {
+			throw new Error("You do not have permission to cancel this report.");
+		}
 
-  // Changing a report validation
-  async validateReport(
-    reportId: number,
-    userId: number,
-    dto: ReportValidateDTO,
-  ) {
-    // Check if user is an admin
-    const user = await this.authService.checkIfUserStaff(userId);
+		if (fetchReport.status === "DONE" || fetchReport.status === "REJECTED") {
+			throw new Error("Cannot cancel a report that is already processed or rejected.");
+		}
 
-    // Fetch a report
-    const fetchReport = await this.reportRepository.getReportById(reportId);
+		const dto: ReportValidateDTO = { 
+			newStatusReport: "CANCELLED", 
+			noteReport: "Cancelled by user" 
+		};
 
-    // If no report found, throw errors
-    if (!fetchReport) {
-      throw new Error("Report not found!");
-    }
+		const cancelledReport = await this.reportRepository.updateReportStatus(
+			reportId,
+			userId,
+			fetchReport.status,
+			dto
+		);
 
-    if (fetchReport.status === dto.newStatusReport) {
-      throw new Error(`Report is already in the stauts ${dto.newStatusReport}`);
-    }
+		return {
+			message: "Report cancelled successfully",
+			report: cancelledReport,
+		};
+	}
 
-    // Check if report & user have the same division
-    this.authService.checkIfReportIsPartOfStaffDivision(
-      user.division,
-      fetchReport.division,
-    );
+	// To get all reports based on staff division
+	async getReportsByDivision(userId: number) {
+		const user = await this.authService.checkIfUserStaff(userId);
 
-    // Change of validation on a report is changed
-    const updatedValidationReport =
-      await this.reportRepository.updateReportStatus(
-        reportId,
-        userId,
-        fetchReport.status,
-        dto,
-      );
+		const division = this.authService.validateStaffDivision(user.division);
 
-    // Return a message and the full data that it got updated
-    return {
-      message: "Report status updated successfully",
-      report: updatedValidationReport,
-    };
-  }
+		const reportDivision = await this.reportRepository.findReportsByDivision(division);
+
+		return reportDivision.map((report) => {
+			const latestHistory = report.statusHistory?.[0];
+			
+			return {
+				reportIdReport: report.id,
+				titleReport: report.title,
+				descriptionReport: report.description,
+				statusReport: report.status,
+				locationReport: report.location,
+				floorReport: report.floor,
+				roomReport: report.room,
+				upvoteCountReport: report._count?.upvotes ?? 0,
+				noteReport: latestHistory?.note ?? "",
+			};
+		});
+	}
+
+	// To get a detailed report for staff members
+	async getReportDetailStaff(reportId: number, userId: number) {
+		const user = await this.authService.checkIfUserStaff(userId);
+
+		const division = this.authService.validateStaffDivision(user.division);
+
+		const fetchReport = await this.reportRepository.getReportById(reportId);
+
+		if (!fetchReport) {
+			throw new Error("Report not found!");
+		}
+
+		this.authService.checkIfReportIsPartOfStaffDivision(
+			division,
+			fetchReport.division
+		);
+
+		const latestHistory = fetchReport.statusHistory?.[0];
+
+		return {
+			reportIdReport: fetchReport.id,
+			titleReport: fetchReport.title,
+			descriptionReport: fetchReport.description,
+			statusReport: fetchReport.status,
+			locationReport: fetchReport.location,
+			floorReport: fetchReport.floor,
+			roomReport: fetchReport.room,
+			upvoteCountReport: fetchReport._count?.upvotes ?? 0,
+			noteReport: latestHistory?.note ?? "",
+		};
+	}
+
+	// To validate and change a report status from staff
+	async validateReport(reportId: number, userId: number, dto: ReportValidateDTO) {
+		const user = await this.authService.checkIfUserStaff(userId);
+
+		const fetchReport = await this.reportRepository.getReportById(reportId);
+
+		if (!fetchReport) {
+			throw new Error("Report not found!");
+		}
+
+		if (fetchReport.status === dto.newStatusReport) {
+			throw new Error(`Report is already in the status ${dto.newStatusReport}`);
+		}
+
+		this.authService.checkIfReportIsPartOfStaffDivision(
+			user.division,
+			fetchReport.division
+		);
+
+		const updatedValidationReport = await this.reportRepository.updateReportStatus(
+			reportId,
+			userId,
+			fetchReport.status,
+			dto
+		);
+
+		return {
+			message: "Report status updated successfully",
+			report: updatedValidationReport,
+		};
+	}
 }

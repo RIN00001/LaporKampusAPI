@@ -3,131 +3,150 @@ import { prisma } from "../config/Prisma";
 import { CreateReportRequestDTO, ReportValidateDTO } from "../dtos/ReportDTO";
 
 export class ReportRepository {
-  createReport(userId: number, dto: CreateReportRequestDTO) {
-    return prisma.report.create({
-      data: {
-        title: dto.titleReport,
-        description: dto.descriptionReport,
-        location: dto.locationReport,
-        floor: dto.floorReport,
-        room: dto.roomReport,
-        division: dto.divisionReport,
-        userId,
-      },
-      include: {
-        images: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-  }
+	// To create a new report in the database
+	createReport(userId: number, dto: CreateReportRequestDTO) {
+		return prisma.report.create({
+			data: {
+				title: dto.titleReport,
+				description: dto.descriptionReport,
+				location: dto.locationReport,
+				floor: dto.floorReport,
+				room: dto.roomReport,
+				division: dto.divisionReport,
+				userId: userId,
+			},
+			include: {
+				images: true,
+				user: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
+			},
+		});
+	}
 
-  addReportImage(reportId: number, imageUrl: string) {
-    return prisma.reportImage.create({
-      data: {
-        reportId,
-        imageUrl,
-      },
-    });
-  }
+	// To add an image to a specific report
+	addReportImage(reportId: number, imageUrl: string) {
+		return prisma.reportImage.create({
+			data: {
+				reportId: reportId,
+				imageUrl: imageUrl,
+			},
+		});
+	}
 
-  getReportById(reportId: number) {
-    return prisma.report.findUnique({
-      where: {
-        id: reportId,
-      },
-      include: {
-        images: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        statusHistory: {
-          orderBy: {
-            changedAt: "desc",
-          },
-          take: 1,
-        },
-        _count: {
-          select: {
-            upvotes: true,
-          }
-        }
-      },
-    });
-  }
+	// To fetch a single report by its ID
+	getReportById(reportId: number) {
+		return prisma.report.findUnique({
+			where: {
+				id: reportId,
+			},
+			include: {
+				images: true,
+				user: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
+				statusHistory: {
+					orderBy: {
+						changedAt: "desc",
+					},
+					take: 1,
+				},
+				_count: {
+					select: {
+						upvotes: true,
+					},
+				},
+			},
+		});
+	}
 
-  updateReportStatus(
-    reportId: number,
-    staffId: number,
-    oldStatus: ReportStatus,
-    dto: ReportValidateDTO,
-  ) {
-    return prisma.report.update({
-      where: {
-        id: reportId,
-      },
-      data: {
-        status: dto.newStatusReport,
-        statusHistory: {
-          create: {
-            oldStatus: oldStatus,
-            newStatus: dto.newStatusReport,
-            note: dto.noteReport,
-            changedById: staffId,
-          },
-        },
-      },
-      include: {
-        statusHistory: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-  }
+	// To update the status of a report and record history
+	updateReportStatus(reportId: number, staffId: number, oldStatus: ReportStatus, dto: ReportValidateDTO) {
+		return prisma.report.update({
+			where: {
+				id: reportId,
+			},
+			data: {
+				status: dto.newStatusReport,
+				statusHistory: {
+					create: {
+						oldStatus: oldStatus,
+						newStatus: dto.newStatusReport,
+						note: dto.noteReport,
+						changedById: staffId,
+					},
+				},
+			},
+			include: {
+				statusHistory: true,
+				user: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
+			},
+		});
+	}
 
-  findReportsByDivision(division: DivisionType) {
-    return prisma.report.findMany({
-      //Find all report based on staff logged in
-      where: {
-        division: division,
-      },
+	// To find all reports based on a specific division
+	findReportsByDivision(division: DivisionType) {
+		return prisma.report.findMany({
+			where: {
+				division: division,
+			},
+			include: {
+				_count: {
+					select: {
+						upvotes: true,
+					},
+				},
+				statusHistory: {
+					orderBy: {
+						changedAt: "desc",
+					},
+					take: 1,
+				},
+			},
+			orderBy: {
+				upvotes: {
+					_count: "desc",
+				},
+			},
+		});
+	}
 
-      // Take how many upvotes a report has
-      include: {
-        _count: {
-          select: {
-            upvotes: true,
-          },
-        },
-        // Take the newest status & note for the UI
-        statusHistory: {
-          orderBy: {
-            changedAt: "desc",
-          },
-          take: 1,
-        },
-      },
-
-      // Order it from highest
-      orderBy: {
-        upvotes: {
-          _count: "desc",
-        },
-      },
-    });
-  }
+	// To find all reports created by a specific user
+	findReportsByUserId(userId: number) {
+		return prisma.report.findMany({
+			where: {
+				userId: userId,
+			},
+			include: {
+				_count: {
+					select: {
+						upvotes: true,
+					},
+				},
+				statusHistory: {
+					orderBy: {
+						changedAt: "desc",
+					},
+					take: 1,
+				},
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		});
+	}
 }
