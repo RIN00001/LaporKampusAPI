@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { errorResponse } from "../utils/ApiResponse";
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -14,9 +15,7 @@ export function authMiddleware(
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.status(401).json(errorResponse("Unauthorized"));
     }
 
     const token = authHeader.split(" ")[1];
@@ -30,8 +29,6 @@ export function authMiddleware(
 
     next();
   } catch (error) {
-    return res.status(401).json({
-      message: "Invalid token",
-    });
+    return res.status(401).json(errorResponse("Invalid token"));
   }
 }

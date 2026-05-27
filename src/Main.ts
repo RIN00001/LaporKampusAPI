@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import authRoutes from "./routes/public/AuthRoute";
 import reportRoutes from "./routes/private/ReportRoute";
+import staffRoutes from "./routes/private/StaffRoute";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/api/auth", authRoutes);
 
 //Private routes
 app.use("/api/reports", reportRoutes);
+app.use("/api/staff", staffRoutes);
 
 app.get("/", (req, res) => {
   res.json({

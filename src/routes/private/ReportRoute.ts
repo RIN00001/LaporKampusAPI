@@ -11,7 +11,8 @@ router.get("/me", authMiddleware, reportController.showAllReportUser);
 router.get("/:id", authMiddleware, reportController.showDetailReportUser);
 router.patch("/:id/cancel", authMiddleware, reportController.cancelReportUser);
 
-// Admin side
+//! Legacy staff routes kept for backward compatibility.
+//! Prefer /api/staff/reports for Jefferson's staff dashboard.
 router.get("/staff", authMiddleware, reportController.showAllReportByDivision);
 router.get("/staff/:id", authMiddleware, reportController.showDetailReportStaff);
 router.patch("/validate/:id", authMiddleware, reportController.validateReport);
