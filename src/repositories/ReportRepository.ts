@@ -1,5 +1,5 @@
 import { DivisionType, ReportStatus } from "@prisma/client";
-import { prisma } from "../config/Prisma";
+import { prisma } from "../config/prisma";
 import { CreateReportRequestDTO, ReportValidateDTO } from "../dtos/ReportDTO";
 
 export class ReportRepository {
