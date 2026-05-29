@@ -272,6 +272,61 @@ export class ReportService {
     };
   }
 
+  // To get all reports based on staff division (for legacy/Android endpoint)
+  async getReportsByDivisionLegacy(userId: number) {
+    const user = await this.authService.checkIfUserStaff(userId);
+    const division = this.authService.validateStaffDivision(user.division);
+
+    const reports = await this.reportRepository.findReportsByDivision(division);
+
+    return reports.map((report) => {
+      const latestHistory = report.statusHistory?.[0];
+
+      return {
+        reportIdReport: report.id,
+        titleReport: report.title,
+        descriptionReport: report.description,
+        statusReport: report.status,
+        locationReport: report.location,
+        floorReport: report.floor,
+        roomReport: report.room,
+        upvoteCountReport: report._count?.upvotes ?? 0,
+        noteReport: latestHistory?.note ?? "",
+      };
+    });
+  }
+
+  // To get detailed report for staff members (for legacy/Android endpoint)
+  async getReportDetailStaffLegacy(reportId: number, userId: number) {
+    const user = await this.authService.checkIfUserStaff(userId);
+    const division = this.authService.validateStaffDivision(user.division);
+
+    const fetchReport = await this.reportRepository.getReportById(reportId);
+
+    if (!fetchReport) {
+      throw new Error("Report not found!");
+    }
+
+    this.authService.checkIfReportIsPartOfStaffDivision(
+      division,
+      fetchReport.division,
+    );
+
+    const latestHistory = fetchReport.statusHistory?.[0];
+
+    return {
+      reportIdReport: fetchReport.id,
+      titleReport: fetchReport.title,
+      descriptionReport: fetchReport.description,
+      statusReport: fetchReport.status,
+      locationReport: fetchReport.location,
+      floorReport: fetchReport.floor,
+      roomReport: fetchReport.room,
+      upvoteCountReport: fetchReport._count?.upvotes ?? 0,
+      noteReport: latestHistory?.note ?? "",
+    };
+  }
+
   private buildStaffReportQuery(query: StaffReportQueryDTO) {
     const page = this.parsePositiveNumber(query.page, 1);
     const limit = Math.min(this.parsePositiveNumber(query.limit, 10), 50);

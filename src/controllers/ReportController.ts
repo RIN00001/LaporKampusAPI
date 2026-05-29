@@ -132,6 +132,44 @@ export class ReportController {
     }
   };
 
+  // Staff side: take all reports based on division (Legacy for Android app)
+  showAllReportByDivisionLegacy = async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = Number(req.user?.id);
+
+      const result = await this.reportService.getReportsByDivisionLegacy(userId);
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Fetch reports failed",
+      });
+    }
+  };
+
+  // Staff side: take report detail (Legacy for Android app)
+  showDetailReportStaffLegacy = async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = Number(req.user?.id);
+      const reportId = Number(req.params.id);
+
+      if (!Number.isInteger(reportId) || reportId < 1) {
+        return res.status(400).json({ message: "Invalid report id" });
+      }
+
+      const result = await this.reportService.getReportDetailStaffLegacy(
+        reportId,
+        userId,
+      );
+
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Fetch report detail failed",
+      });
+    }
+  };
+
   // To validate a report by staff
   validateReport = async (req: AuthRequest, res: Response) => {
     try {
