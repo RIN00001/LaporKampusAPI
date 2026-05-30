@@ -1,12 +1,13 @@
 import { Router } from "express";
 import { ReportController } from "../../controllers/ReportController";
 import { authMiddleware } from "../../middlewares/AuthMiddleware";
+import { uploadMiddleware } from "../../middlewares/UploadMiddleware";
 
 const router = Router();
 const reportController = new ReportController();
 
 // User side
-router.post("/", authMiddleware, reportController.createReport);
+router.post("/", authMiddleware, uploadMiddleware.single("imageReport"), reportController.createReport);
 router.get("/me", authMiddleware, reportController.showAllReportUser);
 
 //! Legacy staff routes kept for backward compatibility.
