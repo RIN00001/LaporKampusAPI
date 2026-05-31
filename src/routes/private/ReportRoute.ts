@@ -8,6 +8,7 @@ const reportController = new ReportController();
 
 // User side
 router.post("/", authMiddleware, uploadMiddleware.single("imageReport"), reportController.createReport);
+router.get("/", authMiddleware, reportController.showAllReportPublic); // <-- Endpoint untuk Dashboard Publik
 router.get("/me", authMiddleware, reportController.showAllReportUser);
 
 //! Legacy staff routes kept for backward compatibility.
