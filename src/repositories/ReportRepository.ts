@@ -43,70 +43,77 @@ export class ReportRepository {
     }
 
     // To fetch a single report by its ID
-    getReportById(reportId: number) {
-        return prisma.report.findUnique({
-            where: {
-                id: reportId,
-            },
-            include: {
-                images: true,
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                    },
+        getReportById(reportId: number) {
+            return prisma.report.findUnique({
+                where: {
+                    id: reportId,
                 },
-                statusHistory: {
-                    orderBy: {
-                        changedAt: "desc",
+                include: {
+                    images: true,
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                        },
                     },
-                    include: {
-                        changedBy: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
+                    statusHistory: {
+                        orderBy: {
+                            changedAt: "desc",
+                        },
+                        include: {
+                            changedBy: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                },
                             },
                         },
                     },
-                },
-                _count: {
-                    select: {
-                        upvotes: true,
+                    _count: {
+                        select: {
+                            upvotes: true,
+                        },
                     },
                 },
-            },
-        });
-    }
+            });
+        }
 
     // NEW: To fetch all public reports for User Dashboard (Excluding CANCELLED status)
-    findAllPublicReports() {
-        return prisma.report.findMany({
-            where: {
-                status: {
-                    not: "CANCELLED", // Menyaring laporan agar yang dicancel tidak tampil di publik
-                },
-            },
-            include: {
-                _count: {
-                    select: {
-                        upvotes: true,
+        findAllPublicReports() {
+            return prisma.report.findMany({
+                where: {
+                    status: {
+                        not: "CANCELLED",
                     },
                 },
-                statusHistory: {
-                    orderBy: {
-                        changedAt: "desc",
+                include: {
+                    _count: {
+                        select: {
+                            upvotes: true,
+                        },
                     },
-                    take: 1,
+                    statusHistory: {
+                        orderBy: {
+                            changedAt: "desc",
+                        },
+                        take: 1,
+                    },
+                    images: true,
                 },
-                images: true,
-            },
-            orderBy: {
-                createdAt: "desc", // Urutkan berdasarkan laporan terbaru
-            },
-        });
-    }
+                orderBy: [
+                    {
+                        upvotes: {
+                            _count: "desc",
+                        },
+                    },
+                    {
+                        createdAt: "desc",
+                    },
+                ],
+            });
+        }
 
     // To update the status of a report and record history
     updateReportStatus(

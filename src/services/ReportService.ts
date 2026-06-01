@@ -49,9 +49,11 @@ export class ReportService {
                 locationReport: report.location,
                 floorReport: report.floor,
                 roomReport: report.room,
+                divisionReport: report.division,
                 upvoteCountReport: report._count?.upvotes ?? 0,
                 noteReport: latestHistory?.note ?? "",
                 imageUrlReport: report.images && report.images.length > 0 ? report.images[0].imageUrl : null,
+                createdAtReport: report.createdAt,
             };
         });
     }
@@ -85,11 +87,7 @@ export class ReportService {
         if (!fetchReport) {
             throw new Error("Report not found!");
         }
-        
-        if (fetchReport.userId !== userId) {
-            throw new Error("You do not have access to view this report.");
-        }
-        
+               
         const latestHistory = fetchReport.statusHistory?.[0];
         
         return {
@@ -100,9 +98,11 @@ export class ReportService {
             locationReport: fetchReport.location,
             floorReport: fetchReport.floor,
             roomReport: fetchReport.room,
+            divisionReport: fetchReport.division,
             upvoteCountReport: fetchReport._count?.upvotes ?? 0,
             noteReport: latestHistory?.note ?? "",
             imageUrlReport: fetchReport.images && fetchReport.images.length > 0 ? fetchReport.images[0].imageUrl : null,
+            createdAtReport: fetchReport.createdAt,
         };
     }
 
