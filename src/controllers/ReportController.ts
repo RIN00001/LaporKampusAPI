@@ -26,18 +26,39 @@ export class ReportController {
         }
     };
 
-    // NEW: To get all public reports (Excluding CANCELLED) for Dashboard
-    showAllReportPublic = async (req: AuthRequest, res: Response) => {
+    toggleUpvote = async (req: AuthRequest, res: Response) => {
         try {
-            const result = await this.reportService.getAllReportsPublic();
-            
+            const userId = Number(req.user?.id);
+            const reportId = Number(req.params.id);
+
+            if (!Number.isInteger(reportId) || reportId < 1) {
+                return res.status(400).json({ message: "Invalid report id" });
+            }
+
+            const result = await this.reportService.toggleUpvote(reportId, userId);
+
             res.status(200).json(result);
         } catch (error) {
             res.status(400).json({
-                message: error instanceof Error ? error.message : "Fetch public reports failed",
+                message: error instanceof Error ? error.message : "Toggle upvote failed",
             });
         }
     };
+
+    // NEW: To get all public reports (Excluding CANCELLED) for Dashboard
+        showAllReportPublic = async (req: AuthRequest, res: Response) => {
+            try {
+                const userId = Number(req.user?.id);
+
+                const result = await this.reportService.getAllReportsPublic(userId);
+                
+                res.status(200).json(result);
+            } catch (error) {
+                res.status(400).json({
+                    message: error instanceof Error ? error.message : "Fetch public reports failed",
+                });
+            }
+        };
 
     // To get all reports for the logged in user
     showAllReportUser = async (req: AuthRequest, res: Response) => {

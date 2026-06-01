@@ -18,7 +18,7 @@ router.get("/staff/:id", authMiddleware, reportController.showDetailReportStaffL
 router.patch("/validate/:id", authMiddleware, reportController.validateReport);
 
 // Dynamic routes must be registered last to prevent shadowing
+router.post("/:id/upvote", authMiddleware, reportController.toggleUpvote);
 router.get("/:id", authMiddleware, reportController.showDetailReportUser);
 router.patch("/:id/cancel", authMiddleware, reportController.cancelReportUser);
-
 export default router;

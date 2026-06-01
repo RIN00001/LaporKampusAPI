@@ -35,8 +35,8 @@ export class ReportService {
     }
 
     // NEW: To get all public reports for User Dashboard (Excluding CANCELLED)
-    async getAllReportsPublic() {
-        const publicReports = await this.reportRepository.findAllPublicReports();
+async getAllReportsPublic(userId: number) {
+    const publicReports = await this.reportRepository.findAllPublicReports(userId);
         
         return publicReports.map((report: any) => {
             const latestHistory = report.statusHistory?.[0];
@@ -54,6 +54,8 @@ export class ReportService {
                 noteReport: latestHistory?.note ?? "",
                 imageUrlReport: report.images && report.images.length > 0 ? report.images[0].imageUrl : null,
                 createdAtReport: report.createdAt,
+                isMineReport: report.userId === userId,
+                hasUpvotedReport: report.upvotes.length > 0,
             };
         });
     }
@@ -89,7 +91,9 @@ export class ReportService {
         }
                
         const latestHistory = fetchReport.statusHistory?.[0];
-        
+        const existingUpvote = await this.reportRepository.findUpvote(userId, reportId);
+
+
         return {
             reportIdReport: fetchReport.id,
             titleReport: fetchReport.title,
@@ -103,6 +107,51 @@ export class ReportService {
             noteReport: latestHistory?.note ?? "",
             imageUrlReport: fetchReport.images && fetchReport.images.length > 0 ? fetchReport.images[0].imageUrl : null,
             createdAtReport: fetchReport.createdAt,
+            isMineReport: fetchReport.userId === userId,
+            hasUpvotedReport: existingUpvote !== null,
+        };
+    }
+
+
+    async toggleUpvote(reportId: number, userId: number) {
+        const report = await this.reportRepository.getReportById(reportId);
+
+        if (!report) {
+            throw new Error("Report not found!");
+        }
+
+        if (report.userId === userId) {
+            throw new Error("You cannot upvote your own report.");
+        }
+
+        if (report.status === "CANCELLED") {
+            throw new Error("Cannot upvote a cancelled report.");
+        }
+
+        const existingUpvote = await this.reportRepository.findUpvote(userId, reportId);
+
+        if (existingUpvote) {
+            await this.reportRepository.deleteUpvote(userId, reportId);
+
+            const upvoteCount = await this.reportRepository.countUpvotes(reportId);
+
+            return {
+                message: "Upvote removed successfully",
+                reportIdReport: reportId,
+                upvoteCountReport: upvoteCount,
+                hasUpvotedReport: false,
+            };
+        }
+
+        await this.reportRepository.createUpvote(userId, reportId);
+
+        const upvoteCount = await this.reportRepository.countUpvotes(reportId);
+
+        return {
+            message: "Upvote added successfully",
+            reportIdReport: reportId,
+            upvoteCountReport: upvoteCount,
+            hasUpvotedReport: true,
         };
     }
 

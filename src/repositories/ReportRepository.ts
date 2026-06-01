@@ -42,78 +42,127 @@ export class ReportRepository {
         });
     }
 
-    // To fetch a single report by its ID
-        getReportById(reportId: number) {
-            return prisma.report.findUnique({
-                where: {
-                    id: reportId,
-                },
-                include: {
-                    images: true,
-                    user: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
-                        },
+// To fetch a single report by its ID
+    getReportById(reportId: number) {
+        return prisma.report.findUnique({
+            where: {
+                id: reportId,
+            },
+            include: {
+                images: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
                     },
-                    statusHistory: {
-                        orderBy: {
-                            changedAt: "desc",
-                        },
-                        include: {
-                            changedBy: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    email: true,
-                                },
+                },
+                statusHistory: {
+                    orderBy: {
+                        changedAt: "desc",
+                    },
+                    include: {
+                        changedBy: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
                             },
                         },
                     },
-                    _count: {
-                        select: {
-                            upvotes: true,
-                        },
+                },
+                _count: {
+                    select: {
+                        upvotes: true,
                     },
                 },
-            });
-        }
+            },
+        });
+    }
 
-    // NEW: To fetch all public reports for User Dashboard (Excluding CANCELLED status)
-        findAllPublicReports() {
-            return prisma.report.findMany({
-                where: {
-                    status: {
-                        not: "CANCELLED",
+
+    findUpvote(userId: number, reportId: number) {
+        return prisma.upvote.findUnique({
+            where: {
+                userId_reportId: {
+                    userId,
+                    reportId,
+                },
+            },
+        });
+    }
+
+    createUpvote(userId: number, reportId: number) {
+        return prisma.upvote.create({
+            data: {
+                userId,
+                reportId,
+            },
+        });
+    }
+
+    deleteUpvote(userId: number, reportId: number) {
+        return prisma.upvote.delete({
+            where: {
+                userId_reportId: {
+                    userId,
+                    reportId,
+                },
+            },
+        });
+    }
+
+    countUpvotes(reportId: number) {
+        return prisma.upvote.count({
+            where: {
+                reportId,
+            },
+        });
+    }
+
+
+// To fetch all public reports for User Dashboard (Excluding CANCELLED status)
+    findAllPublicReports(userId: number) {
+        return prisma.report.findMany({
+            where: {
+                status: {
+                    not: "CANCELLED",
+                },
+            },
+            include: {
+                _count: {
+                    select: {
+                        upvotes: true,
                     },
                 },
-                include: {
-                    _count: {
-                        select: {
-                            upvotes: true,
-                        },
+                statusHistory: {
+                    orderBy: {
+                        changedAt: "desc",
                     },
-                    statusHistory: {
-                        orderBy: {
-                            changedAt: "desc",
-                        },
-                        take: 1,
-                    },
-                    images: true,
+                    take: 1,
                 },
-                orderBy: [
-                    {
-                        upvotes: {
-                            _count: "desc",
-                        },
+                images: true,
+                upvotes: {
+                    where: {
+                        userId,
                     },
-                    {
-                        createdAt: "desc",
+                    select: {
+                        id: true,
                     },
-                ],
-            });
-        }
+                },
+            },
+            orderBy: [
+                {
+                    upvotes: {
+                        _count: "desc",
+                    },
+                },
+                {
+                    createdAt: "desc",
+                },
+            ],
+        });
+    }
 
     // To update the status of a report and record history
     updateReportStatus(
