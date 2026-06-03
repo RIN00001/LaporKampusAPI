@@ -205,6 +205,9 @@ export class ReportRepository {
         return prisma.report.findMany({
             where: {
                 division: division,
+                status: {
+                    not: "CANCELLED",
+                }
             },
             include: {
                 _count: {
